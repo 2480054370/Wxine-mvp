@@ -99,4 +99,14 @@ public class FakeInfosRemoteDataSource  implements InfosDataSource {
             InfoS_SERVICE_DATA.put(Info.getId(), Info);
         }
     }
+
+    @Override
+    public void login(String username, String password, OnLoginFinishedListener listener) {
+
+    }
+
+    @Override
+    public void register(String username, String reusername, String password, OnRegisterFinishedListener listener) {
+
+    }
 }

@@ -45,4 +45,25 @@ public interface InfosDataSource {
     void deleteAllInfos();
 
     void deleteInfo(@NonNull String InfoId);
+
+    /***login and register***/
+
+    void login(String username, String password, OnLoginFinishedListener listener);
+
+    void register(String username, String reusername, String password, OnRegisterFinishedListener listener);
+
+    interface OnLoginFinishedListener {
+
+        void onUserError();
+
+        void onSuccess();
+    }
+
+    interface OnRegisterFinishedListener{
+
+        void onUserError();
+
+        void onSuccess();
+
+    }
 }

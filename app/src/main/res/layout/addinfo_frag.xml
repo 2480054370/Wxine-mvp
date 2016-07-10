@@ -48,5 +48,6 @@
             android:hint="@string/description_hint" />
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
-</ScrollView>
+</ScrollView
+    >
 

@@ -224,4 +224,15 @@ public class InfosLocalDataSource implements InfosDataSource {
 
         db.close();
     }
+
+    /***login and register***/
+    @Override
+    public void login(String username, String password, OnLoginFinishedListener listener) {
+
+    }
+
+    @Override
+    public void register(String username, String reusername, String password, OnRegisterFinishedListener listener) {
+
+    }
 }

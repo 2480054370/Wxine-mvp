@@ -1,9 +1,19 @@
 package com.example.wxine_mvp.data.source;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.example.wxine_mvp.data.Info;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -286,5 +296,107 @@ public class InfosRepository implements InfosDataSource {
         } else {
             return mCachedInfos.get(id);
         }
+    }
+
+    /***login and register***/
+    @Override
+    public void login(final String username,final String password,final OnLoginFinishedListener listener) {
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String data = "";
+                int tmp;
+                try {
+                    CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+                    URL url = new URL("http://10.0.2.2:82/AndroidLogin/login.php");
+                    String urlParams = "name=" + username + "&password=" + password;
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                    httpURLConnection.setDoOutput(true);
+                    OutputStream os = httpURLConnection.getOutputStream();        //输出流
+                    os.write(urlParams.getBytes());
+                    httpURLConnection.connect();
+                    //从headers中取出来，并分割，为什么要分割，Chrome打开F12自己看看就明白了
+                    String[] aaa = httpURLConnection.getHeaderField("Set-Cookie").split(";");
+                    //app.sessionId = aaa[0];
+                    os.flush();
+                    os.close();
+
+                    InputStream is = httpURLConnection.getInputStream();          //输入流
+                    while ((tmp = is.read()) != -1) {
+                        data += (char) tmp;
+                    }
+
+                    is.close();
+                    httpURLConnection.disconnect();
+
+                    return data;
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return "Exception: " + e.getMessage();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "Exception: " + e.getMessage();
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                boolean error = false;
+                super.onPostExecute(s);
+                if (s.toString().equals("{\"user_data\":[]}")) {
+                    listener.onUserError();//model层里面回调listener
+                    error = true;
+                } else {
+                    listener.onSuccess();
+                }
+            }
+        }.execute();
+    }
+
+    @Override
+    public void register(final String username,final String reusername,final String password,final OnRegisterFinishedListener listener) {
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                String data = "";
+                int tmp;
+                try {
+                    URL url = new URL("http://10.0.2.2:82/AndroidLogin/register.php");
+                    String urlParams = "name=" + username + "&password=" + password;
+
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                    httpURLConnection.setDoOutput(true);
+                    OutputStream os = httpURLConnection.getOutputStream();
+                    os.write(urlParams.getBytes());
+                    os.flush();
+                    os.close();
+                    InputStream is = httpURLConnection.getInputStream();
+                    while ((tmp = is.read()) != -1) {
+                        data += (char) tmp;
+                    }
+                    is.close();
+                    httpURLConnection.disconnect();
+
+                    return data;
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return "Exception: " + e.getMessage();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "Exception: " + e.getMessage();
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                if (s.equals("2")) {
+                    listener.onUserError();
+                } else if (s.equals("1")) {
+                    listener.onSuccess();
+                }
+            }
+        }.execute();
     }
 }
